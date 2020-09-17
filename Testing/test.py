@@ -18,8 +18,15 @@ def print_hello():
     print("Hello!")
 
 print_hello()
-"""
+
 
 x = "5"
 y = "5"
 print(x + y)
+"""
+
+name = "mary"
+if name.lower() == "bob" or "sam":
+    print("Yes")
+else:
+    print("No")
