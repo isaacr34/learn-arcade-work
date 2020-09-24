@@ -16,6 +16,7 @@ def main():
     canteen = 3
 
     while not done:
+        print()
         print("A. Drink from your canteen.")
         print("B. Ahead moderate speed.")
         print("C. Ahead full speed.")
@@ -44,19 +45,35 @@ def main():
             n_miles = random.randrange(7, 14)
             thirst += 1
             camel_tiredness += random.randrange(1, 3)
-            print(f"You traveled {miles} miles.")
             miles_traveled += miles
-            print(f"The natives traveled {n_miles} miles.")
             miles_natives += n_miles
+            oasis = random.randrange(20)
+            if oasis == 7:
+                thirst = 0
+                camel_tiredness = 0
+                canteen = 3
+                print("As you were traveling you found an oasis!")
+                print("You and your camel drink and rest.")
+            else:
+                print(f"You traveled {miles} miles.")
+                print(f"The natives traveled {n_miles} miles.")
         elif user_input.upper() == "B":
             miles = random.randrange(5, 12)
             n_miles = random.randrange(7, 14)
             thirst += 1
             camel_tiredness += 1
-            print(f"You traveled {miles} miles.")
             miles_traveled += miles
-            print(f"The natives traveled {n_miles} miles.")
             miles_natives += n_miles
+            oasis = random.randrange(20)
+            if oasis == 7:
+                thirst = 0
+                camel_tiredness = 0
+                canteen = 3
+                print("As you were traveling you found an oasis!")
+                print("You and your camel drink and rest.")
+            else:
+                print(f"You traveled {miles} miles.")
+                print(f"The natives traveled {n_miles} miles.")
         elif user_input.upper() == "A":
             if canteen > 0:
                 print("You take a drink from your canteen.")
@@ -64,18 +81,23 @@ def main():
                 thirst = 0
             elif canteen == 0:
                 print("There is no water in your canteen.")
-        if 7 > thirst > 4:
+        if not done and 7 > thirst > 4:
             print("You are thirsty.")
         if thirst > 6:
             print("You died of thirst!")
             done = True
-        if 9 > camel_tiredness > 5:
+        if not done and 9 > camel_tiredness > 5:
             print("Your camel is getting tired.")
         if camel_tiredness > 8:
             print("Your camel is dead.")
             done = True
-        if miles_natives >= miles_traveled:
+        if not done and miles_natives >= miles_traveled:
             print("The natives have caught you!")
+            done = True
+        elif (miles_traveled - miles_natives) <= 15:
+            print("The natives are getting close!")
+        if miles_traveled >= 200:
+            print("You have made it across the Mobi desert and survived!")
             done = True
 
 
