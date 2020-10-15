@@ -1,69 +1,36 @@
-"""
-Move Sprite With Keyboard
+""" Sprite Sample Program """
 
-Simple program to show moving a sprite with the keyboard.
-The sprite_move_keyboard_better.py example is slightly better
-in how it works, but also slightly more complex.
-
-Artwork from http://kenney.nl
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.sprite_move_keyboard
-"""
-
+import random
 import arcade
 
-SPRITE_SCALING = 0.5
+# --- Constants ---
+SPRITE_SCALING_PLAYER = 0.5
+SPRITE_SCALING_COIN = 0.2
+COIN_COUNT = 50
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Move Sprite with Keyboard Example"
-
-MOVEMENT_SPEED = 5
-
-
-class Player(arcade.Sprite):
-    """ Player Class """
-
-    def update(self):
-        """ Move the player """
-        # Move player.
-        # Remove these lines if physics engine is moving player.
-        self.center_x += self.change_x
-        self.center_y += self.change_y
-
-        # Check for out-of-bounds
-        if self.left < 0:
-            self.left = 0
-        elif self.right > SCREEN_WIDTH - 1:
-            self.right = SCREEN_WIDTH - 1
-
-        if self.bottom < 0:
-            self.bottom = 0
-        elif self.top > SCREEN_HEIGHT - 1:
-            self.top = SCREEN_HEIGHT - 1
 
 
 class MyGame(arcade.Window):
-    """
-    Main application class.
-    """
+    """ Our custom Window Class"""
 
-    def __init__(self, width, height, title):
-        """
-        Initializer
-        """
-
+    def __init__(self):
+        """ Initializer """
         # Call the parent class initializer
-        super().__init__(width, height, title)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Sprite Example")
 
         # Variables that will hold sprite lists
         self.player_list = None
+        self.coin_list = None
 
         # Set up the player info
         self.player_sprite = None
+        self.score = 0
 
-        # Set the background color
+        # Don't show the mouse cursor
+        self.set_mouse_visible(False)
+
         arcade.set_background_color(arcade.color.AMAZON)
 
     def setup(self):
@@ -71,59 +38,53 @@ class MyGame(arcade.Window):
 
         # Sprite lists
         self.player_list = arcade.SpriteList()
+        self.coin_list = arcade.SpriteList()
+
+        # Score
+        self.score = 0
 
         # Set up the player
-        self.player_sprite = Player(":resources:images/animated_characters/female_person/femalePerson_idle.png", SPRITE_SCALING)
+        # Character image from kenney.nl
+        self.player_sprite = arcade.Sprite("character_maleAdventurer_idle.png", SPRITE_SCALING_PLAYER)
         self.player_sprite.center_x = 50
         self.player_sprite.center_y = 50
         self.player_list.append(self.player_sprite)
 
+        # Create the coins
+        for i in range(COIN_COUNT):
+
+            # Create the coin instance
+            # Coin image from kenney.nl
+            coin = arcade.Sprite("coin_01.png", SPRITE_SCALING_COIN)
+
+            # Position the coin
+            coin.center_x = random.randrange(SCREEN_WIDTH)
+            coin.center_y = random.randrange(SCREEN_HEIGHT)
+
+            # Add the coin to the lists
+            self.coin_list.append(coin)
+
     def on_draw(self):
-        """
-        Render the screen.
-        """
-
-        # This command has to happen before we start drawing
+        """ Draw everything """
         arcade.start_render()
-
-        # Draw all the sprites.
+        self.coin_list.draw()
         self.player_list.draw()
 
-    def on_update(self, delta_time):
-        """ Movement and game logic """
+        # Put the text on the screen.
+        output = f"Score: {self.score}"
+        arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
 
-        # Move the player
-        self.player_list.update()
+    def on_mouse_motion(self, x, y, dx, dy):
+        """ Handle Mouse Motion """
 
-    def on_key_press(self, key, modifiers):
-        """Called whenever a key is pressed. """
-
-        # If the player presses a key, update the speed
-        if key == arcade.key.UP:
-            self.player_sprite.change_y = MOVEMENT_SPEED
-        elif key == arcade.key.DOWN:
-            self.player_sprite.change_y = -MOVEMENT_SPEED
-        elif key == arcade.key.LEFT:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player_sprite.change_x = MOVEMENT_SPEED
-
-    def on_key_release(self, key, modifiers):
-        """Called when the user releases a key. """
-
-        # If a player releases a key, zero out the speed.
-        # This doesn't work well if multiple keys are pressed.
-        # Use 'better move by keyboard' example if you need to
-        # handle this.
-        if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.player_sprite.change_y = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.player_sprite.change_x = 0
+        # Move the center of the player sprite to match the mouse x, y
+        self.player_sprite.center_x = x
+        self.player_sprite.center_y = y
 
 
 def main():
     """ Main method """
-    window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    window = MyGame()
     window.setup()
     arcade.run()
 
