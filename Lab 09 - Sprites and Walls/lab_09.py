@@ -9,7 +9,7 @@ If Python and Arcade are installed, this example can be run from the command lin
 python -m arcade.examples.sprite_move_scrolling
 """
 
-# import random
+import random
 import arcade
 import os
 
