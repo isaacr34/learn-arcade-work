@@ -42,10 +42,12 @@ class Gem(arcade.Sprite):
 class Coal(arcade.Sprite):
 
     def reset_pos(self):
+
         self.left = random.randrange(SCREEN_HEIGHT)
         self.center_x = SCREEN_WIDTH
 
     def update(self):
+
         self.center_x -= 1
 
         if self.right < 0:
@@ -67,6 +69,10 @@ class MyGame(arcade.Window):
         # Set up the player info
         self.player_sprite = None
         self.score = 0
+
+        # Set up sounds
+        self.gem_sound = arcade.load_sound("impactMining_001.ogg")
+        self.coal_sound = arcade.load_sound("impactPlate_heavy_004.ogg")
 
         # Don't show the mouse cursor
         self.set_mouse_visible(False)
@@ -101,6 +107,19 @@ class MyGame(arcade.Window):
             # Position the coin
             gem.center_x = random.randrange(SCREEN_WIDTH)
             gem.center_y = random.randrange(SCREEN_HEIGHT)
+
+            if gem.center_x <= 10:
+                gem.center_x = gem.center_x + 10
+
+            if gem.center_x >= 790:
+                gem.center_x = gem.center_x - 10
+
+            if gem.center_y <= 10:
+                gem.center_y = gem.center_y + 10
+
+            if gem.center_y >= 590:
+                gem.center_y = gem.center_y - 10
+
             gem.change_x = random.randrange(-3, 4)
             gem.change_y = random.randrange(-3, 4)
 
@@ -108,7 +127,6 @@ class MyGame(arcade.Window):
             self.gem_list.append(gem)
 
         for i in range(COAL_COUNT):
-
             coal = Coal("ore_coal.png", SPRITE_SCALING_COAL)
 
             coal.center_x = random.randrange(SCREEN_WIDTH)
@@ -127,12 +145,19 @@ class MyGame(arcade.Window):
         output = f"Score: {self.score}"
         arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
 
+        if len(self.gem_list) == 0:
+            arcade.draw_text("Game Over", 250, 300, arcade.color.WHITE, 50)
+
     def on_mouse_motion(self, x, y, dx, dy):
         """ Handle Mouse Motion """
-
         # Move the center of the player sprite to match the mouse x, y
-        self.player_sprite.center_x = x
-        self.player_sprite.center_y = y
+        if len(self.gem_list) == 0:
+            self.player_sprite.center_x = 100
+            self.player_sprite.center_y = 100
+            self.set_mouse_visible(True)
+        else:
+            self.player_sprite.center_x = x
+            self.player_sprite.center_y = y
 
     def update(self, delta_time):
 
@@ -143,14 +168,17 @@ class MyGame(arcade.Window):
         for gem in gems_hit_list:
             gem.remove_from_sprite_lists()
             self.score += 1
+            arcade.play_sound(self.gem_sound)
 
-        self.coal_list.update()
+        if len(self.gem_list) > 0:
+            self.coal_list.update()
 
         coal_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coal_list)
 
         for coal in coal_hit_list:
             coal.remove_from_sprite_lists()
             self.score -= 1
+            arcade.play_sound(self.coal_sound)
 
 
 def main():
