@@ -14,6 +14,8 @@ import arcade
 import os
 
 SPRITE_SCALING = 0.5
+SPRITE_SCALING_COIN = 0.5
+COIN_COUNT = 25
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -44,9 +46,11 @@ class MyGame(arcade.Window):
 
         # Sprite lists
         self.player_list = None
+        self.coin_list = None
 
         # Set up the player
         self.player_sprite = None
+        self.score = 0
 
         self.coin_list = None
         self.wall_list = None
@@ -63,14 +67,18 @@ class MyGame(arcade.Window):
         # Sprite lists
         self.player_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
+        self.coin_list = arcade.SpriteList()
+
+        self.score = 0
 
         # Set up the player
-        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png", 0.4)
+        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png",
+                                           0.4)
         self.player_sprite.center_x = 64
         self.player_sprite.center_y = 270
         self.player_list.append(self.player_sprite)
 
-        # -- Set up several columns of walls
+        # Set up the walls
         for x in range(0, 1650, 1600):
             for y in range(0, 1000, 64):
                 # Randomly skip a box so the player can find a way through
@@ -85,6 +93,32 @@ class MyGame(arcade.Window):
                 wall.center_x = x
                 wall.center_y = y
                 self.wall_list.append(wall)
+
+        for y in range(0, 1000, 256):
+            for x in range(64, 1664, 64):
+                if random.randrange(5) > 0:
+                    wall = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", SPRITE_SCALING)
+                    wall.center_x = x
+                    wall.center_y = y
+                    self.wall_list.append(wall)
+
+        # Set up the Coins
+        for i in range(COIN_COUNT):
+            coin = arcade.Sprite("platformPack_item010.png", SPRITE_SCALING_COIN)
+
+            coin_placed_successfully = False
+
+            while not coin_placed_successfully:
+                coin.center_x = random.randrange(1650)
+                coin.center_y = random.randrange(1000)
+
+                wall_hit_list = arcade.check_for_collision_with_list(coin, self.wall_list)
+                coin_hit_list = arcade.check_for_collision_with_list(coin, self.coin_list)
+
+                if len(wall_hit_list) == 0 and len(coin_hit_list) == 0:
+                    coin_placed_successfully = True
+
+            self.coin_list.append(coin)
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
 
@@ -107,6 +141,10 @@ class MyGame(arcade.Window):
         # Draw all the sprites.
         self.wall_list.draw()
         self.player_list.draw()
+        self.coin_list.draw()
+
+        output = f"Score: {self.score}"
+        arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -134,6 +172,14 @@ class MyGame(arcade.Window):
         # Call update on all sprites (The sprites don't do much in this
         # example though.)
         self.physics_engine.update()
+        self.coin_list.update()
+
+        coins_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
+                                                              self.coin_list)
+
+        for coin in coins_hit_list:
+            coin.remove_from_sprite_lists()
+            self.score += 1
 
         # --- Manage Scrolling ---
 

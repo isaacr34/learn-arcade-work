@@ -6,8 +6,8 @@ MARGIN = 5
 ROW_COUNT = 10
 COLUMN_COUNT = 10
 
-SCREEN_HEIGHT = (HEIGHT * ROW_COUNT + (MARGIN + 1) * ROW_COUNT)
-SCREEN_WIDTH = (WIDTH * COLUMN_COUNT + (MARGIN + 1) * COLUMN_COUNT)
+SCREEN_HEIGHT = (HEIGHT * ROW_COUNT + MARGIN * (ROW_COUNT + 1))
+SCREEN_WIDTH = (WIDTH * COLUMN_COUNT + MARGIN * (COLUMN_COUNT + 1))
 
 
 class MyGame(arcade.Window):
@@ -19,6 +19,16 @@ class MyGame(arcade.Window):
         super().__init__(width, height)
 
         arcade.set_background_color(arcade.color.BLACK)
+
+        self.grid = []
+        for row in range(ROW_COUNT):
+            self.grid.append([])
+            for column in range(COLUMN_COUNT):
+                self.grid[row].append(0)
+
+        print(self.grid)
+
+        self.grid = [[0 for x in range(10)] for y in range(10)]
 
     def on_draw(self):
         """
