@@ -13,7 +13,7 @@ import random
 import arcade
 import os
 
-SPRITE_SCALING = 0.5
+SPRITE_SCALING = 1
 SPRITE_SCALING_COIN = 0.5
 COIN_COUNT = 25
 
@@ -52,6 +52,8 @@ class MyGame(arcade.Window):
         self.player_sprite = None
         self.score = 0
 
+        self.coin_sound = arcade.load_sound("impactMetal_heavy_003.ogg")
+
         self.coin_list = None
         self.wall_list = None
 
@@ -72,7 +74,7 @@ class MyGame(arcade.Window):
         self.score = 0
 
         # Set up the player
-        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png",
+        self.player_sprite = arcade.Sprite("character_maleAdventurer_idle.png",
                                            0.4)
         self.player_sprite.center_x = 64
         self.player_sprite.center_y = 270
@@ -82,14 +84,14 @@ class MyGame(arcade.Window):
         for x in range(0, 1650, 1600):
             for y in range(0, 1000, 64):
                 # Randomly skip a box so the player can find a way through
-                wall = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", SPRITE_SCALING)
+                wall = arcade.Sprite("platformPack_tile016.png", SPRITE_SCALING)
                 wall.center_x = x
                 wall.center_y = y
                 self.wall_list.append(wall)
 
         for y in range(0, 1000, 960):
             for x in range(64, 1600, 64):
-                wall = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", SPRITE_SCALING)
+                wall = arcade.Sprite("platformPack_tile016.png", SPRITE_SCALING)
                 wall.center_x = x
                 wall.center_y = y
                 self.wall_list.append(wall)
@@ -97,7 +99,7 @@ class MyGame(arcade.Window):
         for y in range(0, 1000, 256):
             for x in range(64, 1664, 64):
                 if random.randrange(5) > 0:
-                    wall = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", SPRITE_SCALING)
+                    wall = arcade.Sprite("platformPack_tile004.png", SPRITE_SCALING)
                     wall.center_x = x
                     wall.center_y = y
                     self.wall_list.append(wall)
@@ -144,7 +146,8 @@ class MyGame(arcade.Window):
         self.coin_list.draw()
 
         output = f"Score: {self.score}"
-        arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
+        arcade.draw_text(output, self.player_sprite.center_x - 30, self.player_sprite.center_y - 45, arcade.color.WHITE,
+                         14)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -180,6 +183,7 @@ class MyGame(arcade.Window):
         for coin in coins_hit_list:
             coin.remove_from_sprite_lists()
             self.score += 1
+            arcade.play_sound(self.coin_sound)
 
         # --- Manage Scrolling ---
 
