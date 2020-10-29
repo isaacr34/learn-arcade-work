@@ -77,7 +77,7 @@ class MyGame(arcade.Window):
         self.player_sprite = arcade.Sprite("character_maleAdventurer_idle.png",
                                            0.4)
         self.player_sprite.center_x = 64
-        self.player_sprite.center_y = 270
+        self.player_sprite.center_y = 64
         self.player_list.append(self.player_sprite)
 
         # Set up the walls
@@ -98,8 +98,16 @@ class MyGame(arcade.Window):
 
         for y in range(0, 1000, 256):
             for x in range(64, 1664, 64):
-                if random.randrange(5) > 0:
+                if random.randrange(4) > 0:
                     wall = arcade.Sprite("platformPack_tile004.png", SPRITE_SCALING)
+                    wall.center_x = x
+                    wall.center_y = y
+                    self.wall_list.append(wall)
+
+        for x in range(0, 1664, 320):
+            for y in range(0, 1000, 64):
+                if random.randrange(2) > 0:
+                    wall = arcade.Sprite("platformPack_tile016.png", SPRITE_SCALING)
                     wall.center_x = x
                     wall.center_y = y
                     self.wall_list.append(wall)
@@ -111,7 +119,7 @@ class MyGame(arcade.Window):
             coin_placed_successfully = False
 
             while not coin_placed_successfully:
-                coin.center_x = random.randrange(1650)
+                coin.center_x = random.randrange(1600)
                 coin.center_y = random.randrange(1000)
 
                 wall_hit_list = arcade.check_for_collision_with_list(coin, self.wall_list)
@@ -141,8 +149,8 @@ class MyGame(arcade.Window):
         arcade.start_render()
 
         # Draw all the sprites.
-        self.wall_list.draw()
         self.player_list.draw()
+        self.wall_list.draw()
         self.coin_list.draw()
 
         output = f"Score: {self.score}"
