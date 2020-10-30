@@ -22,13 +22,16 @@ def main():
 
     for line in alice_file:
         word_list = split_line(line)
-        return word_list
-        for individual_words in word_list:
-            return individual_words
+        for word in word_list:
+            current_list_position = 0
+            while current_list_position < len(word_list) and word.upper() == dictionary_list:
+                current_list_position += 1
 
+            print(word)
 
+    alice_file.close()
 
-
+    # print(misspelled_list)
 
 
 if __name__ == "__main__":
