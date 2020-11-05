@@ -90,28 +90,33 @@ class MyGame(arcade.Window):
             else:
                 self.grid[row][column] = 0
 
-            if row - 1 >= ROW_COUNT:
+            # Bottom Square
+            if row > 0:
                 if self.grid[row - 1][column] == 0:
                     self.grid[row - 1][column] = 1
-                else:
+                elif self.grid[row - 1][column] == 1:
                     self.grid[row - 1][column] = 0
 
-            if row + 1 <= ROW_COUNT:
+            # Top Square
+            if ROW_COUNT - 1 > row:
                 if self.grid[row + 1][column] == 0:
                     self.grid[row + 1][column] = 1
-                else:
+                elif self.grid[row + 1][column] == 1:
                     self.grid[row + 1][column] = 0
 
-            if column + 1 <= COLUMN_COUNT:
+            # Right Square
+            if COLUMN_COUNT - 1 > column:
                 if self.grid[row][column + 1] == 0:
                     self.grid[row][column + 1] = 1
-                else:
+                elif self.grid[row][column + 1] == 1:
                     self.grid[row][column + 1] = 0
 
-            if self.grid[row][column - 1] == 0:
-                self.grid[row][column - 1] = 1
-            else:
-                self.grid[row][column - 1] = 0
+            # Left Square
+            if column > 0:
+                if self.grid[row][column - 1] == 0:
+                    self.grid[row][column - 1] = 1
+                elif self.grid[row][column - 1] == 1:
+                    self.grid[row][column - 1] = 0
 
 
 def main():
