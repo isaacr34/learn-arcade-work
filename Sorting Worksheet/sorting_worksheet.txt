@@ -89,4 +89,7 @@ there is smaller than the value in the key_pos. If it is then the key_value
 should go there. Also the scan_pos goes from right to left instead of
 left to right.
 
-
+13.
+For the selection sort the outside loop ran 100 times and the inside loop for
+selection sort ran 4950 times. For the insertion sort the outside loop ran 99 times
+and the inside loop ran 2673 times.
