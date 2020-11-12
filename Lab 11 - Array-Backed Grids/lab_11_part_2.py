@@ -128,7 +128,7 @@ class MyGame(arcade.Window):
                     if self.grid[row][column] == 1 and self.grid[row][column + 1] == 1:
                         cells_in_a_row += 1
             if cells_in_a_row >= 2:
-                print("There are", cells_in_a_row, "continuous blocks selected on row", row)
+                print("There are", cells_in_a_row, "continuous blocks selected on row", row, ".")
 
             cells_in_a_row = 1
 
