@@ -9,7 +9,7 @@ SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Platform"
 
 # Constants used to scale our sprites from their original size
-CHARACTER_SCALING = .75
+CHARACTER_SCALING = .65
 TILE_SCALING = 1
 COIN_SCALING = 1
 SPRITE_PIXEL_SIZE = 64
@@ -155,7 +155,7 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
-        if self.player_list != 0 and self.score <= 4:
+        if self.lives != 0 and self.score < 5:
             if key == arcade.key.UP or key == arcade.key.W:
                 if self.physics_engine.can_jump():
                     self.player_sprite.change_y = PLAYER_JUMP_SPEED
