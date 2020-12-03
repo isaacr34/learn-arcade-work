@@ -20,6 +20,9 @@ PLAYER_MOVEMENT_SPEED = 10
 GRAVITY = 1
 PLAYER_JUMP_SPEED = 20
 
+PLAYER_START_X = 128
+PLAYER_START_Y = 128
+
 # How many pixels to keep as a minimum margin between the character
 # and the edge of the screen.
 LEFT_VIEWPORT_MARGIN = 250
@@ -28,7 +31,75 @@ BOTTOM_VIEWPORT_MARGIN = 200
 TOP_VIEWPORT_MARGIN = 1
 
 
-class MyGame(arcade.Window):
+class StartView(arcade.View):
+
+    def on_show(self):
+
+        arcade.set_background_color(arcade.csscolor.RED)
+
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+    def on_draw(self):
+
+        arcade.start_render()
+        arcade.draw_text("Platform Game", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.color.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_text("Press ENTER to start", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("Press I for instructions", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 150,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+
+    def on_key_press(self, key, modifiers):
+
+        if key == arcade.key.ENTER:
+            game_view = GameView()
+            game_view.setup()
+            self.window.show_view(game_view)
+        if key == arcade.key.I:
+            instruction_view = InstructionView()
+            self.window.show_view(instruction_view)
+            instruction_view.setup()
+
+
+class InstructionView(arcade.View):
+
+    def on_show(self):
+
+        arcade.set_background_color(arcade.csscolor.GREEN)
+
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+    def on_draw(self):
+
+        arcade.start_render()
+        arcade.draw_text("Instructions", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 150,
+                         arcade.color.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_text("Press ENTER to go to the start screen", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 150,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("<--", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 75,
+                         arcade.color.WHITE, font_size=35, anchor_x="center")
+        arcade.draw_text("Press A or the left arrow to go left", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("-->", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.color.WHITE, font_size=35, anchor_x="center")
+        arcade.draw_text("Press D or the right arrow to go right", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 25,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("/\\", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 55,
+                         arcade.color.WHITE, font_size=25, anchor_x="center")
+        arcade.draw_text("|", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 70,
+                         arcade.color.WHITE, font_size=25, anchor_x="center")
+        arcade.draw_text("Press SPACE or the up arrow to jump", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 100,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+
+    def on_key_press(self, key, modifiers):
+        """ If the user presses the mouse button, start the game. """
+        if key == arcade.key.ENTER:
+            start_view = StartView()
+            self.window.show_view(start_view)
+            start_view.setup()
+
+
+class GameView(arcade.View):
     """
     Main application class.
     """
@@ -36,7 +107,7 @@ class MyGame(arcade.Window):
     def __init__(self):
 
         # Call the parent class and set up the window
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         # These are 'lists' that keep track of our sprites. Each sprite should
         # go into a list.
@@ -51,6 +122,8 @@ class MyGame(arcade.Window):
 
         # Our physics engine
         self.physics_engine = None
+
+        self.lives = 1
 
         # Used to keep track of our scrolling
         self.view_bottom = 0
@@ -85,8 +158,8 @@ class MyGame(arcade.Window):
         # Set up the player, specifically placing it at these coordinates.
         image_source = "character_robot_idle.png"
         self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
-        self.player_sprite.center_x = 128
-        self.player_sprite.center_y = 128
+        self.player_sprite.center_x = PLAYER_START_X
+        self.player_sprite.center_y = PLAYER_START_Y
         self.player_list.append(self.player_sprite)
 
         # --- Load in a map from the tiled editor ---
@@ -192,6 +265,14 @@ class MyGame(arcade.Window):
             # Add one to the score
             self.score += 1
 
+        if self.player_sprite.center_y < -100:
+            self.player_sprite.center_x = PLAYER_START_X
+            self.player_sprite.center_y = PLAYER_START_Y
+
+            self.view_left = 0
+            self.view_bottom = 0
+            changed_viewport = True
+
         for self.player_sprite in self.player_list:
             spikes_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spikes_list)
 
@@ -244,8 +325,10 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main method """
-    window = MyGame()
-    window.setup()
+
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = StartView()
+    window.show_view(start_view)
     arcade.run()
 
 
