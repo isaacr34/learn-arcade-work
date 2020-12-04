@@ -33,6 +33,12 @@ TOP_VIEWPORT_MARGIN = 1
 
 class StartView(arcade.View):
 
+    def __init__(self):
+
+        super().__init__()
+
+        self.level = 1
+
     def on_show(self):
 
         arcade.set_background_color(arcade.csscolor.RED)
@@ -42,18 +48,18 @@ class StartView(arcade.View):
     def on_draw(self):
 
         arcade.start_render()
-        arcade.draw_text("Platform Game", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
-                         arcade.color.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_text("Platform Game", SCREEN_WIDTH / 2, 400,
+                         arcade.color.BLACK, font_size=100, anchor_x="center")
         arcade.draw_text("Press ENTER to start", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
-                         arcade.color.WHITE, font_size=20, anchor_x="center")
+                         arcade.color.GREEN, font_size=20, anchor_x="center")
         arcade.draw_text("Press I for instructions", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 150,
-                         arcade.color.WHITE, font_size=20, anchor_x="center")
+                         arcade.color.GREEN, font_size=20, anchor_x="center")
 
     def on_key_press(self, key, modifiers):
 
         if key == arcade.key.ENTER:
             game_view = GameView()
-            game_view.setup()
+            game_view.setup(self.level)
             self.window.show_view(game_view)
         if key == arcade.key.I:
             instruction_view = InstructionView()
@@ -132,13 +138,13 @@ class GameView(arcade.View):
         # Keep track of the score
         self.score = 0
 
+        self.level = 1
+
         # Load sounds
         self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 
-        arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
-
-    def setup(self):
+    def setup(self, level):
         """ Set up the game here. Call this function to restart the game. """
 
         # Used to keep track of our scrolling
@@ -164,8 +170,6 @@ class GameView(arcade.View):
 
         # --- Load in a map from the tiled editor ---
 
-        # Name of map file to load
-        map_name = "snow_map.tmx"
         # Name of the layer in the file that has our platforms/walls
         platforms_layer_name = 'Platforms'
         # Name of the layer that has items for pick-up
@@ -174,6 +178,8 @@ class GameView(arcade.View):
         background_layer_name = 'Background'
 
         spikes_layer_name = 'Spikes'
+
+        map_name = f"map_level_{level}.tmx"
 
         # Read in the tiled map
         my_map = arcade.tilemap.read_tmx(map_name)
@@ -185,16 +191,23 @@ class GameView(arcade.View):
                                                       use_spatial_hash=True)
 
         # -- Coins
-        self.coin_list = arcade.tilemap.process_layer(my_map, coins_layer_name, TILE_SCALING)
+        self.coin_list = arcade.tilemap.process_layer(my_map,
+                                                      coins_layer_name,
+                                                      TILE_SCALING,
+                                                      use_spatial_hash=True)
 
-        self.background_list = arcade.tilemap.process_layer(my_map, background_layer_name, TILE_SCALING)
+        self.background_list = arcade.tilemap.process_layer(my_map,
+                                                            background_layer_name,
+                                                            TILE_SCALING)
 
-        self.spikes_list = arcade.tilemap.process_layer(my_map, spikes_layer_name, TILE_SCALING, use_spatial_hash=True)
+        self.spikes_list = arcade.tilemap.process_layer(my_map,
+                                                        spikes_layer_name,
+                                                        TILE_SCALING,
+                                                        use_spatial_hash=True)
 
         # --- Other stuff
         # Set the background color
-        if my_map.background_color:
-            arcade.set_background_color(my_map.background_color)
+        arcade.set_background_color(arcade.color.CORNFLOWER_BLUE)
 
         # Create the 'physics engine'
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite,
@@ -219,16 +232,26 @@ class GameView(arcade.View):
         arcade.draw_text(score_text, 10 + self.view_left, 10 + self.view_bottom,
                          arcade.csscolor.BLACK, 18)
 
-        if self.score == 5:
-            arcade.draw_text("Game Over", 325 + self.view_left, 325 + self.view_bottom, arcade.color.BLACK, 75)
-
         if len(self.player_list) == 0:
-            arcade.draw_text("Game Over", 325 + self.view_left, 325 + self.view_bottom, arcade.color.BLACK, 75)
+            arcade.draw_text("Game Over", 300 + self.view_left, 425 + self.view_bottom, arcade.color.RED, 75)
+            arcade.draw_text("Press ENTER to restart", 240 + self.view_left, 300 + self.view_bottom, arcade.color.BLACK,
+                             50)
+            arcade.draw_text("Press S to go to start screen", 200 + self.view_left, 225 + self.view_bottom,
+                             arcade.color.BLACK,
+                             50)
+
+        if self.level == 2 and self.score == 7:
+            arcade.draw_text("YOU WIN", 250 + self.view_left, 400 + self.view_bottom, arcade.color.PURPLE, 125)
+            arcade.draw_text("Press ENTER to restart", 240 + self.view_left, 300 + self.view_bottom, arcade.color.BLACK,
+                             50)
+            arcade.draw_text("Press S to go to start screen", 200 + self.view_left, 225 + self.view_bottom,
+                             arcade.color.BLACK,
+                             50)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
-        if self.lives != 0 and self.score < 5:
+        if len(self.player_list) != 0 and self.score != 7:
             if key == arcade.key.UP or key == arcade.key.W:
                 if self.physics_engine.can_jump():
                     self.player_sprite.change_y = PLAYER_JUMP_SPEED
@@ -237,6 +260,33 @@ class GameView(arcade.View):
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             elif key == arcade.key.RIGHT or key == arcade.key.D:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+
+        if len(self.player_list) == 0:
+            if key == arcade.key.ENTER:
+                game_view = GameView()
+                game_view.setup(level=1)
+                self.window.show_view(game_view)
+                self.score = 0
+            elif key == arcade.key.S:
+                start_view = StartView()
+                self.window.show_view(start_view)
+                start_view.setup()
+
+        if self.score == 7:
+            if key == arcade.key.ENTER:
+                game_view = GameView()
+                game_view.setup(level=1)
+                self.window.show_view(game_view)
+                self.score = 0
+            elif key == arcade.key.S:
+                start_view = StartView()
+                self.window.show_view(start_view)
+                start_view.setup()
+
+        if key == arcade.key.KEY_0:
+            self.level += 1
+            self.setup(level=2)
+            self.score = 0
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
@@ -265,20 +315,13 @@ class GameView(arcade.View):
             # Add one to the score
             self.score += 1
 
-        if self.player_sprite.center_y < -100:
-            self.player_sprite.center_x = PLAYER_START_X
-            self.player_sprite.center_y = PLAYER_START_Y
-
-            self.view_left = 0
-            self.view_bottom = 0
-            changed_viewport = True
-
         for self.player_sprite in self.player_list:
             spikes_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spikes_list)
 
             for spike_hit in spikes_hit_list:
                 arcade.play_sound(self.collect_coin_sound)
                 self.player_sprite.remove_from_sprite_lists()
+                self.lives = 0
 
         # --- Manage Scrolling ---
 
@@ -310,6 +353,14 @@ class GameView(arcade.View):
             self.view_bottom -= bottom_boundary - self.player_sprite.bottom
             changed = True
 
+        if self.player_sprite.center_y < -100:
+            self.player_sprite.center_x = PLAYER_START_X
+            self.player_sprite.center_y = PLAYER_START_Y
+
+            self.view_left = 0
+            self.view_bottom = 0
+            changed = True
+
         if changed:
             # Only scroll to integers. Otherwise we end up with pixels that
             # don't line up on the screen
@@ -321,6 +372,14 @@ class GameView(arcade.View):
                                 SCREEN_WIDTH + self.view_left,
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
+
+        if self.level == 1 and self.score == 5:
+
+            self.level += 1
+
+            self.setup(self.level)
+
+            self.score = 0
 
 
 def main():
